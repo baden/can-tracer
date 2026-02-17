@@ -219,8 +219,24 @@ document.getElementById('btn-save').addEventListener('click', () => {
 // Trace Playback (Mockup logic for now, or simple send loop)
 const btnPlay = document.getElementById('btn-play-trace');
 const chkLoop = document.getElementById('chk-loop-trace');
+const elTraceStatus = document.getElementById('trace-status');
+const elTraceProgress = document.getElementById('trace-progress');
+
 let playbackInterval = null;
 let loadedPackets = [];
+
+function updateTraceStatus(status) {
+    elTraceStatus.textContent = status;
+}
+
+function updateTraceProgress(current, total) {
+    if (total > 0) {
+        elTraceProgress.value = (current / total) * 100;
+        updateTraceStatus(`${current} / ${total}`);
+    } else {
+        elTraceProgress.value = 0;
+    }
+}
 
 document.getElementById('btn-load').addEventListener('click', () => {
     document.getElementById('file-input').click(); // Trigger hidden file input
@@ -234,7 +250,10 @@ document.getElementById('file-input').addEventListener('change', (e) => {
         // Just store them for playback
         loadedPackets = packets;
         btnPlay.disabled = false;
-        btnPlay.textContent = `Play (${packets.length} frames)`;
+        
+        updateTraceStatus(`Loaded: ${packets.length} frames`);
+        elTraceProgress.value = 0;
+        
         alert(`Loaded ${packets.length} packets. Ready to play.`);
     });
 });
@@ -244,7 +263,8 @@ btnPlay.addEventListener('click', () => {
         // Stop
         clearInterval(playbackInterval);
         playbackInterval = null;
-        btnPlay.textContent = `Play Loaded Trace`;
+        btnPlay.textContent = `Play Trace`;
+        updateTraceStatus(`Stopped: ${loadedPackets.length} frames`);
         return;
     }
 
@@ -263,7 +283,9 @@ btnPlay.addEventListener('click', () => {
             } else {
                 clearInterval(playbackInterval);
                 playbackInterval = null;
-                btnPlay.textContent = `Play Loaded Trace`;
+                btnPlay.textContent = "Play Trace";
+                updateTraceStatus(`Done: ${loadedPackets.length} frames`);
+                elTraceProgress.value = 100;
                 return;
             }
         }
@@ -277,6 +299,12 @@ btnPlay.addEventListener('click', () => {
              const now = Date.now();
              logBuffer.add({ ...p, type: 'TX', timestamp: now, delta: 0 }); 
         }
+        
         idx++;
+        
+        // Update progress every 10 frames to avoid heavy DOM updates
+        if (idx % 10 === 0 || idx >= loadedPackets.length) {
+             updateTraceProgress(idx, loadedPackets.length);
+        }
     }, interval);
 });

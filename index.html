@@ -281,7 +281,13 @@
        <div class="panel-section">
         <div class="panel-title">Playback</div>
         <div class="control-row">
-            <button id="btn-play-trace" disabled>Play Loaded Trace</button>
+            <button id="btn-play-trace" disabled>Play Trace</button>
+        </div>
+        <div class="control-row" style="margin-top: 5px;">
+             <span id="trace-status" style="font-size: 11px; color: #aaa;">No trace loaded</span>
+        </div>
+        <div class="control-row">
+             <progress id="trace-progress" value="0" max="100" style="width: 100%; height: 5px;"></progress>
         </div>
         <div class="control-row">
             <label>Loop:</label>
