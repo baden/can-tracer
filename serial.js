@@ -86,7 +86,7 @@ export class SerialPort {
 
     async write(data) {
         if (!this.port || !this.port.writable) return;
-        console.log("Write to serial:", [data]);
+        // console.log("Write to serial:", [data]);
         const writer = this.port.writable.getWriter();
         const encoder = new TextEncoder();
         await writer.write(encoder.encode(data));

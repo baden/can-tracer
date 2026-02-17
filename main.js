@@ -36,7 +36,6 @@ serial.onData = (chunk) => {
 const btnConnect = document.getElementById('btn-connect');
 const btnDisconnect = document.getElementById('btn-disconnect');
 const btnSend = document.getElementById('btn-send');
-const chkOpen = document.getElementById('chk-open');
 const chkAuto = document.getElementById('chk-auto');
 const slcanBaud = document.getElementById('slcan-baud');
 const slcanBaudFd = document.getElementById('slcan-baud-fd');
@@ -47,10 +46,8 @@ function updateConnectionState(isConnected) {
     btnConnect.disabled = isConnected;
     btnDisconnect.disabled = !isConnected;
     document.getElementById('status-conn').textContent = isConnected ? 'Connected' : 'Disconnected';
-    chkOpen.disabled = !isConnected;
     
     if (!isConnected) {
-        chkOpen.checked = false;
         chkAuto.checked = false;
         clearInterval(autoSendInterval);
         autoSendInterval = null;
@@ -88,7 +85,6 @@ btnConnect.addEventListener('click', async () => {
             
             // 5. Open Channel
             await serial.write(slcan.cmdOpen());
-            chkOpen.checked = true; // Reflect state
             
             await sleep(50);
             // Start reading AFTER setup is complete
@@ -105,31 +101,17 @@ btnDisconnect.addEventListener('click', async () => {
     updateConnectionState(false);
 });
 
-// SLCAN Control: Open/Close
-chkOpen.addEventListener('change', async (e) => {
-    if (!serial.isConnected) return;
-    if (e.target.checked) {
-        await serial.write(slcan.cmdOpen());
-    } else {
-        await serial.write(slcan.cmdClose());
-    }
-});
-
 // Helper for changing settings that require close/open
 async function changeSetting(cmd) {
     if (!serial.isConnected) return;
-    const wasOpen = chkOpen.checked;
-    if (wasOpen) {
-        await serial.write(slcan.cmdClose());
-        chkOpen.checked = false;
-    }
+    
+    await serial.write(slcan.cmdClose());
+    await sleep(50); // Short delay to ensure device processes it
     
     await serial.write(cmd);
+    await sleep(50);
     
-    if (wasOpen) {
-        await serial.write(slcan.cmdOpen());
-        chkOpen.checked = true;
-    }
+    await serial.write(slcan.cmdOpen());
 }
 
 slcanBaud.addEventListener('change', (e) => changeSetting(slcan.cmdSetup(e.target.value.replace('S', ''))));

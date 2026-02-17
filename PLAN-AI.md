@@ -65,4 +65,23 @@ I will execute the following:
 3.  UI Logic: Write ui.js (including the virtual scroller) and main.js.
 4.  Styling: Write style.css.
 5.  Build: Ensure everything is linked correctly in index.html.
-Does this plan look good to you? Shall I proceed with creating the files?
+
+---
+
+### Session Log (2026-02-18)
+
+**Completed:**
+1.  **Trace File Loading:** Fixed the `file-io.js` parser.
+    *   Improved support for mixed line endings (`\r\n`, `\n`, `\r`).
+    *   Made the "CAN Hacker" / "PEAK" format detection more robust (less strict header checks, more heuristic).
+    *   Fixed issue where valid PEAK/TRC files were parsed as 0 packets.
+2.  **Playback UI:** Enhanced the Trace Playback section in `index.html` and `main.js`.
+    *   Added a `<progress>` bar.
+    *   Added a text status indicator (e.g., "Loaded: X frames", "120 / 5000").
+    *   Implemented "Stop" functionality during playback.
+
+**Current Issues / Next Steps:**
+1.  **Playback Timing:** The current playback implementation uses a fixed interval from the `tx-interval` input field (default 1000ms or user-set). It **ignores** the original timestamps (`delta`) from the trace file.
+    *   *Next Action:* Implement logic to respect the original `delta` times from the trace file for accurate playback.
+2.  **Validation:** Need to verify if the "Loop" feature works seamlessly with the new progress bar logic.
+3.  **Trace Viewing:** Currently, we can only *play* a loaded trace, but we cannot *view* it in the log window without playing it. This might be a useful future feature.
