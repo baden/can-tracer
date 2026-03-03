@@ -81,23 +81,29 @@ export class UI {
             let dataHex = '';
             if (packet.type.includes('RTR')) {
                 dataHex = '[RTR]';
-            } else {
+            } else if (packet.data && Array.isArray(packet.data)) {
                 dataHex = packet.data.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+            } else {
+                dataHex = `<span style="color: #666; font-style: italic;">${packet.raw || ''}</span>`;
             }
 
             // Compact type label
             let typeLabel = '';
+            // Safe access to properties that might not exist on CMD/ERROR packets
             if (packet.ext) typeLabel += 'E';
-            if (packet.type.includes('FD')) typeLabel += 'F';
+            if (packet.type && packet.type.includes('FD')) typeLabel += 'F';
             if (packet.brs) typeLabel += 'B';
             if (typeLabel) typeLabel = `<span style="color:#888; font-size:10px; margin-left: 2px;">${typeLabel}</span>`;
+            
+            const idDisplay = (packet.id !== undefined) ? packet.id.toString(16).toUpperCase().padStart(3, '0') : '-';
+            const dlcDisplay = (packet.dlc !== undefined) ? packet.dlc : '-';
 
             html += `
                 <div class="log-row ${typeClass}" style="transform: translateY(${top}px);">
                     <div>${ts}</div>
-                    <div>${packet.delta.toFixed(4)}</div>
-                    <div style="display:flex; align-items:center;">${packet.id.toString(16).toUpperCase().padStart(3, '0')} ${typeLabel}</div>
-                    <div>${packet.dlc}</div>
+                    <div>${packet.delta ? packet.delta.toFixed(4) : '0.0000'}</div>
+                    <div style="display:flex; align-items:center;">${idDisplay} ${typeLabel}</div>
+                    <div>${dlcDisplay}</div>
                     <div class="col-data">${dataHex}</div>
                 </div>
             `;
